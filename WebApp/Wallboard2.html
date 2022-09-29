@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Dashboard - SB Admin</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
+    </head>
+    <body onload="startTime()" >
+    <!--NAVBAR -->
+    <nav class="navbar navbar-expand-lg  bg-secondary" >
+        <a class="navbar-brand" href="#">
+            <img src="logo.svg" width="150" height="30" class="d-inline-block align-top" alt="">
+        </a>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <div class="position-absolute  top-0 end-0" id="txt" style="font-size:30px">
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Wrapper  -->
+    <div class="container-fluid mt-5 ">
+        <main>
+        <div class="row">
+            <h1 class="mt-4">144_Op2</h1>
+            <div id="txt" style="font-size:30px">
+                </div>
+        </div>
+
+         <!-- Primera fila  -->    
+            <div class="row justify-conten">
+            <!-- Card Llamadas completadas  -->
+                <div class="col">
+                    <div class="card bg-success text-white mb-4">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                        Llamadas Completadas:</div>
+                                    <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">12</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa fa-check fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- Card Llamadas Abandonadas  -->
+                <div class="col ">
+                    <div class="card bg-danger text-white mb-4">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                        Llamadas abandonadas:</div>
+                                    <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">80</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fa fa-close fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- Card tiempo hablado  -->
+                <div class="col">
+                    <div class="card bg-info text-white mb-4">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                        Tiempo de hablado:</div>
+                                    <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">8:10</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <!-- Card tiempo espera  -->
+                <div class="col">
+                    <div class="card bg-info text-white mb-4">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                        Tiempo de espera:              
+                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">12:02</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         
+        <!-- segunda fila  -->
+        <div class="row justify-content ">
+            <!-- Card total de llamadas  -->
+            <div class="col">
+                <div class="card bg-secondary text-white mb-4">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold  text-uppercase mb-1">
+                                    Total de llamadas recibidas:</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">25</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-phone fa-2x text-gray-300"></i>
+                                <i class="fas fa-arrow-down fa-1x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card cola de espera  -->
+            <div class="col">
+                <div class="card bg-warning text-white mb-4">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                    Llamadas en espera:</div>
+                                <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">80</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa fa-phone fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card cola de espera  -->
+            <div class="col">
+                <div class="card bg-info text-white mb-4">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                    Nivel de servicio:</div>
+                                <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">20%</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-bar-chart fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Card Callbacks  -->
+            <div class="col">
+                <div class="card bg-info text-white mb-4">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold  text-center text-uppercase mb-1">
+                                    Llamadas en callback:</div>
+                                <div class="h5 mb-0 font-weight-bold text-center text-gray-800 ">20%</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-bar-chart fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Fila agentes  -->
+            <div class="row ">    
+                <!-- Card agentes  -->
+               <div class="col">
+                   <div class="card  border-secondary text-white mb-4">
+                       <div class="card-header text-secondary">
+                               <div class="col mr-2 font-bold text-uppercase  ">
+                                   <i class="fas fa-user fa-2x text-gray-300"></i>
+                                    Agentes:
+                               </div>
+                       </div>
+                       <div class="card-body">
+                           <div class="row no-gutters align-items-center">
+                               <div class="col-auto">
+                                   <div style ="color: green; font-weight: bold;">Disponibles: 3</div>
+                                   <div style ="color: orange; font-weight: bold;">Ocupados: 23</div>
+                                   <div style ="color: gray; font-weight: bold;">Pausa: 23</div>
+                                   <div style ="color: purple; font-weight: bold;" >Wrap Up: 3</div>
+                               </div>    
+                           </div>
+                       </div>
+                   </div>
+               </div>
+               <div class="col">
+                    <div class="card  border-secondary text-white mb-4">
+                        <div class="col mr-2">
+                        <div id="curve_chart"></div>
+                    </div>
+                </div>
+               </div>
+
+        </div>
+    </div>
+    </main>
+    </div>
+</body>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="assets/demo/chart-area-demo.js"></script>
+<script src="assets/demo/chart-bar-demo.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" crossorigin="anonymous"></script>
+<script src="js/datatables-simple-demo.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+
+<script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Year', 'Llamadas entrantes'],
+          ['7:00',  100],
+          ['12:00',  150],
+          ['15:00',  400],
+          ['19:00',  80]
+        ]);
+
+        var options = {
+          title: 'Llamadas',
+          curveType: 'function',
+          legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+
+<script>
+    function startTime() {
+      const today = new Date();
+      let h = today.getHours();
+      let m = today.getMinutes();
+      let s = today.getSeconds();
+      m = checkTime(m);
+      s = checkTime(s);
+      document.getElementById('txt').innerHTML =  h + ":" + m + ":" + s;
+      setTimeout(startTime, 1000);
+    }
+    
+    function checkTime(i) {
+      if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+      return i;
+    }
+    </script>

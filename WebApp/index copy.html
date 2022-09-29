@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./images/favicon.png">
+    <title>uC Wallboard</title>
+
+    <link rel="stylesheet" href="./bootstrap-5.2.0-beta1-dist/css/bootstrap.min.css">
+
+    <script src="./bootstrap-5.2.0-beta1-dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css"> -->
+
+    <link rel="stylesheet" href="./styles/style.css">
+    <link rel="stylesheet" href="./styles/monitor.css">
+    <script src="./scripts/jQuery.js"></script>
+    <script src="./scripts/index.js"></script>
+</head>
+
+<body>
+
+    <!--NAVBAR -->
+    <nav class="navbar navbar-expand-md p-0 navbar-dark bg-primary shadow">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="./images/logo.svg" width="150" height="50" class="d-inline-block align-text-top"
+                    alt="Wallboard">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+                <div class="navbar-nav me-auto mb-2 mb-lg-0 d-flex">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active fs-5 " href="#" id="btnClientes" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Campaña
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="btnClientes" id="selectCampanas">
+                            <li><a class="dropdown-item btnMenu" href="#" id="btnMenuAgregarCliente">Sin campañas</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <span class="nav-item fs-5 text-light fst-italic fw-semibold mt-2" id="labelSelectQueue">
+                        [seleccionar campaña]
+                    </span>
+                </div>
+                <div class="navbar-brand fs-4" data-bs-placement="left">
+                    <i class="bi bi-clock"></i>
+                    <span id="navbarTime" title="Hora"></span>
+                </div>
+
+
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+
+        <div class="row justify-content-center " id="welcomeMessage">
+            <div class="col-8 alert alert-info mt-5" role="alert">
+                <h4 class="alert-heading text-center">SELECCIONE UNA CAMPAÑA</h4>
+                <hr>
+                <p class="mb-0 text-center">Los datos serán actualizados cada 5 segundos</p>
+            </div>
+        </div>
+
+        <div class="row my-2 gy-3 d-none" id="dataDashboard">
+
+            <!-- AGENTES -->
+            <div class="col-12 col-xxl-6 ">
+                <div class="card">
+                    <div class="card-body row">
+                        <h1 class="card-title mb-2 monitor-h1" ><img src="./bootstrap-icons-1.8.3/person.svg" style="width:40px"
+                                alt="" srcset=""> Agentes</h1>
+                        <hr>
+                        <!-- DISPONIBLES  -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card" style="max-height: 11rem;">
+                                <div class="card-header px-1 text-center monitor-cardHeader fs-2" >Disponibles</div>
+                                <div class="card-body p-0">
+                                    <!-- <span class="card-text" style="font-size:100px"><i class="bi bi-person-check"></i></span> -->
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="usuariosDisponibles">6666</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- OCUPADOS -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card" style="max-height: 11rem;">
+                                <div class="card-header px-1 text-center fs-2 monitor-cardHeader">Ocupados</div>
+                                <div class="card-body p-0">
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="usuariosOcupados">6666</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- PAUSADOS  -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card " style="max-height: 11rem;">
+                                <div class="card-header px-1 text-center fs-2 monitor-cardHeader">En pausa</div>
+                                <div class="card-body p-0">
+                                    <!-- <span class="card-text" style="font-size:100px"><i class="bi bi-person-check"></i></span> -->
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="usuariosPausados">4</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EN WRAPUP  -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card " style="max-height: 11rem;">
+                                <div class="card-header px-1 text-center fs-2 monitor-cardHeader">En wrap-up</div>
+                                <div class="card-body p-0">
+                                    <!-- <span class="card-text" style="font-size:100px"><i class="bi bi-person-check"></i></span> -->
+                                    <p class="card-text text-center monitor-counter"
+                                        style="font-size:100px;margin-top: -30px; letter-spacing: 0;"
+                                        id="usuariosWrapup">12</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- LLAMADAS -->
+            <div class="col-12 col-xxl-6">
+                <div class="card">
+                    <div class="card-body row">
+                        <h1 class="card-title mb-2 monitor-h1"><img src="./bootstrap-icons-1.8.3/telephone-inbound.svg"
+                                style="width:40px" alt="" srcset=""> Llamadas</h1>
+                        <hr>
+
+                        <!-- ATENDIDAS  -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card " style="max-height: 11rem;">
+                                <div class="card-header px-1 text-center fs-2 monitor-cardHeader">Atendidas</div>
+                                <div class="card-body p-0">
+                                    <!-- <span class="card-text" style="font-size:100px"><i class="bi bi-person-check"></i></span> -->
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="llamadasAtendidas">1000</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ABONDANADAS -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card " style=" max-height: 11rem;">
+                                <div class="card-header px-1 text-center fs-2 monitor-cardHeader">Perdidas</div>
+                                <div class="card-body p-0">
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="llamadasAbandonadas">2222</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EN ESPERA  -->
+                        <div class="col-3 mx-0 px-1">
+                            <div id="llamadasesperandoDiv1" class="card border border-2 border-dark mb-1 monitor-card"
+                                style=" max-height: 11rem;">
+                                <div id="llamadasesperandoDiv2" class="card-header px-1 text-center fs-2 monitor-cardHeader">En espera
+                                </div>
+                                <div class="card-body p-0">
+                                    <!-- <span class="card-text" style="font-size:100px"><i class="bi bi-person-check"></i></span> -->
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="llamadasEspera">4444</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOTAL  -->
+                        <div class="col-3 mx-0 px-1">
+                            <div class="card border border-2 border-dark mb-1 monitor-card" style=" max-height: 11rem;">
+                                <div class="card-header px-1 text-center fs-2 monitor-cardHeader">Total</div>
+                                <div class="card-body p-0">
+                                    <!-- <span class="card-text" style="font-size:100px"><i class="bi bi-person-check"></i></span> -->
+                                    <p class="card-text text-center monitor-counter" style="font-size:100px;margin-top: -30px;"
+                                        id="llamadasTotal">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- INDICADORES -->
+            <div class="col-12 col-xxl-6">
+                <div class="card">
+                    <div class="card-body row">
+                        <h1 class="card-title mb-2 monitor-h1"><img src="./bootstrap-icons-1.8.3/graph-up-arrow.svg"
+                                style="width:40px" alt="" srcset="">
+                            Indicadores</h1>
+                        <hr>
+
+                        <table class="display-6 monitor-tabla">
+                            <tr>
+                                <td>
+                                    <img src="./bootstrap-icons-1.8.3/stopwatch.svg" style="width:40px" alt=""
+                                        srcset=""> Media hablado:
+                                </td>
+                                <td id="indicadorTiempoHablado" class="text-end">
+                                    0
+                                </td>
+                                <td>
+                                    hs
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img src="./bootstrap-icons-1.8.3/hourglass-split.svg" style="width:40px" alt=""
+                                        srcset=""> Media en espera:
+                                </td>
+                                <td id="indicadorTiempoEspera" class="text-end">
+                                    0
+                                </td>
+                                <td>
+                                    hs
+                                </td>
+                            </tr>
+                            <tr id="trnivelservicio">
+                                <td>
+                                    <img src="./bootstrap-icons-1.8.3/bar-chart-line.svg" style="width:40px" alt=""
+                                        srcset=""> Nivel de servicio:
+                                </td>
+                                <td id="indicadorNivelServicio" class="text-end">
+                                    0
+                                </td>
+                                <td>
+                                    %
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <!-- CALLBACKS -->
+            <div class="col-12 col-xxl-6" id="col-callbacks">
+                <div class="card" style="width: 100%;">
+                    <div class="card-body row">
+
+                        <h1 class="card-title mb-2 monitor-h1">
+                            <img src="./bootstrap-icons-1.8.3/telephone-outbound.svg" style="width:40px" alt=""
+                                srcset="">
+                            Rellamadas
+                        </h1>
+                        <hr>
+
+                        <table class="display-6 monitor-tabla">
+                            <tr>
+                                <td  >
+                                    <img src="./bootstrap-icons-1.8.3/check-all.svg" style="width:40px" alt=""
+                                        srcset="">
+                                    Llamadas completadas:
+                                </td>
+                                <td id="rellamadaMarcador" class="text-start">
+                                    {marcador}
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img src="./bootstrap-icons-1.8.3/arrow-repeat.svg" style="width:40px" alt=""
+                                        srcset=""> Procesando:
+                                </td>
+                                <td id="rellamadaProcesando" class="text-start">
+                                    0
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <img src="./bootstrap-icons-1.8.3/calendar3.svg" style="width:40px" alt=""
+                                        srcset=""> Agendados:
+                                </td>
+                                <td id="rellamadaAgendado" class="text-start">
+                                    0
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- TOASTS -->
+
+    <div class="position-fixed bottom-0 end-0  p-3" style="z-index: 11">
+        <div id="Toast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="msjToast">
+
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- spinner -->
+    <div class="loading">Loading&#8230;</div>
+    <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+</body>
+
+</html>

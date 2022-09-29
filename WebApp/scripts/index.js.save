@@ -1,0 +1,793 @@
+//const apiUrl = "http://localhost/ETLSynapsis/Api/";
+ const apir
+let timerCantEmpresas;
+let timerCantSesiones;
+var toastLiveExample;
+let logs_global;
+$().ready(cargaPronta);
+
+
+function cargaPronta() {
+    console.clear();
+    inicializarEventos();
+    limpiarIntervalos();
+}
+function inicializarEventos() {
+
+    // Botones 
+    $("#btnLogin").click(validarCredenciales);
+    $("#btnLogOut").click(cerrarSession);
+    $(".btnMenu").click(ocultarTodasLasSesiones);
+    $("#btnAgregarClienteNuevo").click(validarFormClienteNuevo);
+    $("#btnLimpiarFormClienteNuevo").click(limpiarFormClienteNuevo);
+    $("#btnLimpiarFormClienteEditar").click(limpiarFormEditarCliente);
+
+    $("#btnInicio").click(mostrarInicio);
+    $("#btnMenuAgregarCliente").click(mostrarAgregarCliente);
+    $("#btnMenuEditarCliente").click(mostrarEditarCliente);
+    $("#btnMenuLog").click(mostrarLogs);
+    $("#btn_obtenerLogs").click(obtenerLogsPorFecha);
+    $("#btnEditarCliente").click(validarEdicionCliente);
+    $("#switchEditar").change(cambiarSwitchEditar);
+
+    capturarCambioDePagina();
+
+    $(document).on('keypress', function (e) {
+        if (e.which == 13 && window.location.pathname == "/WebApp/index.html") {
+            validarCredenciales();
+        }
+    });
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+    toastLiveExample = document.getElementById('Toast');
+}
+
+
+//Login
+function validarCredenciales() {
+
+    if ($("#username").val() == '' || $("#password").val() == "") {
+        showToast('danger', "Credenciales erroneas")
+    }
+    else {
+        showSpinner();
+        tryLogin($("#username").val(), $("#password").val())
+    }
+}
+function tryLogin(username, password) {
+
+    let data = {
+        username: username,
+        password: password
+    };
+    $.post({
+        type: "POST",
+        url: apiUrl + 'user/login/',
+        data: JSON.stringify(data),
+        success: loginSuccess,
+        error: loginError
+    })
+}
+function loginSuccess(data) {
+    console.log(data);
+    window.sessionStorage.setItem('token', data.data.token);
+
+    if (data.data.expiration) {
+
+        window.sessionStorage.setItem('expirationToken', ((data.data.expiration - 5) * 1000));
+
+    }
+    cargarAppPage();
+}
+function loginError(data) {
+    console.log(data);
+    showToast('danger', "Ocurrió un error al iniciar sesión");
+    hideSpinner();
+}
+
+
+//Manterner token vivo
+function keepSessionOpen() {
+
+    setInterval(() => {
+        actualizarToken();
+    }, (window.sessionStorage.getItem('expirationToken')));
+}
+function actualizarToken() {
+
+    $.ajax({
+        type: 'GET',
+        url: apiUrl + `user/login?token=${sessionStorage.getItem('token')}`,
+        success: actualizarTokenSuccess,
+        error: actualizarTokenError
+    })
+}
+function actualizarTokenSuccess(data) {
+    // console.log("Token updated " + new Date());
+    window.sessionStorage.setItem('token', data.data.token);
+}
+function actualizarTokenError(data) {
+    console.log(data);
+    cerrarSession();
+}
+function isToken() {
+    return sessionStorage.getItem("token") != null;
+}
+function validarToken(callback) {
+
+    $.ajax({
+        type: 'GET',
+        url: apiUrl + `user/login?tokenValidation=true&token=${sessionStorage.getItem('token')}`,
+        success: callback,
+        error: callback
+    })
+
+}
+function validarTokenSuccess(data) {
+    console.log(data);
+    return true;
+}
+function validarTokenError() {
+    console.log(data);
+    return false;
+}
+
+
+//Carga de documentos HTML // Sesion
+function capturarCambioDePagina() {
+
+    $(document).ready(function () {
+        showSpinner();
+        switch (window.location.pathname) {
+            case "/WebApp/index.html":
+                onloadIndex();
+                break;
+
+            case "/WebApp/app.html":
+                validarToken(onloadApp);
+                break;
+        }
+    });
+}
+function onloadIndex() {
+    if (isToken()) {
+        cargarAppPage();
+    }
+    hideSpinner();
+}
+function cargarAppPage() {
+    window.location.replace('app.html');
+}
+function onloadApp(data) {
+
+    if (data.status != 200) {
+        cerrarSession();
+    }
+    keepSessionOpen();
+    execContadores();
+    getContadorSesiones();
+    mostrarInicio()
+
+
+}
+function cerrarSession() {
+    sessionStorage.clear();
+    limpiarIntervalos();
+
+    if (window.location.pathname.indexOf("index.html") == -1) {
+        console.log(window.location.pathname.indexOf("index.html"));
+        location.replace("index.html");
+    }
+}
+
+
+
+//Mostrar/ocultar secciones
+function mostrarInicio() {
+    // mostrarLogs();
+    mostrarSeccion('divInicio');
+    $("#btnInicio").addClass('active');
+}
+function mostrarSeccion(seccion) {
+
+    $(`#${seccion}`).removeClass('d-none');
+    $(`#${seccion}`).addClass('d-flex');
+    hideSpinner();
+}
+function ocultarTodasLasSesiones() {
+    showSpinner();
+    limpiarFormularios();
+    $(".appSection").removeClass('d-flex');
+    $(".appSection").addClass('d-none');
+    $(".btnMenu").removeClass("active");
+    $("#btnClientes").removeClass("active");
+}
+
+
+//Editar cliente
+function mostrarEditarCliente() {
+    mostrarSeccion('divEditarCliente');
+    $("#btnClientes").addClass('active');
+    obtenerCompanias()
+}
+function obtenerCompanias() {
+    showSpinner();
+    var dt = new Date();
+    var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+
+    $.ajax({
+        type: 'GET',
+        url: apiUrl + `company?token=${sessionStorage.getItem('token')}&fecha=${time}`,
+        success: obtenerCompaniasSuccess,
+        error: obtenerCompaniasError
+    })
+}
+function obtenerCompaniasSuccess(data) {
+    // console.log(data);
+    fullSelectClientes(data.data);
+}
+function obtenerCompaniasError(data) {
+    // console.log(data);
+}
+function fullSelectClientes(clientes) {
+
+    if (clientes) {
+
+        if (clientes.length == 0) {
+            $("#formSelectCliente").html('<h5 >No hay clientes cargados</h5>');
+        } else {
+            $("#formSelectCliente").html('<h5>Listado de clientes</h5><select class="form-select" id="selectEditClientes" aria-label="Default select example"></select>');
+        }
+        $("#selectEditClientes").append(`<option value="#" selected>Seleccionar un cliente</option>`)
+        clientes.map((cliente) => {
+            $("#selectEditClientes").append(`<option value="${cliente.id}">${cliente.name}</option>`)
+        })
+        $("#selectEditClientes").change(cambiarSelectEditar);
+
+    } else {
+        $("#formSelectCliente").html('<h5 >No hay clientes cargados</h5>');
+        $("#btnEditarCliente").addClass("disabled");
+    }
+
+    hideSpinner();
+}
+function cambiarSwitchEditar() {
+
+    if ($("#switchEditar").prop("checked")) {
+        $("#smallHabilitar").addClass("fw-bold");
+        $("#smallDeshabilitar").removeClass('fw-bold');
+    } else {
+        $("#smallDeshabilitar").addClass('fw-bold');
+        $("#smallHabilitar").removeClass('fw-bold');
+    }
+}
+function cambiarSelectEditar() {
+    if ($("#selectEditClientes").val() != "#") {
+        $("#btnEditarCliente").removeClass("disabled");
+        obtenerCompania($("#selectEditClientes").val());
+    } else {
+        $("#btnEditarCliente").addClass("disabled");
+        limpiarFormEditarCliente();
+    }
+}
+function obtenerCompania(id) {
+    showSpinner();
+    var dt = new Date();
+    var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+
+    $.ajax({
+        type: 'GET',
+        url: apiUrl + `company?token=${sessionStorage.getItem('token')}&id=${id}&fecha=${time}`,
+        success: obtenerCompaniaSuccess,
+        error: obtenerCompaniaError
+    })
+}
+function obtenerCompaniaSuccess(data) {
+    fullFormEdit(data.data);
+}
+function obtenerCompaniaError(data) {
+    console.log(data);
+}
+function fullFormEdit(empresa) {
+    $("#smallHabilitar").removeClass('fw-bold');
+    $("#smallDeshabilitar").removeClass('fw-bold');
+
+    $("#inputEditarNombreEmpresa").val(empresa.name);
+
+    if (empresa.enabled == "1") {
+        $("#switchEditar").prop('checked', true);
+        $("#smallHabilitar").addClass("fw-bold");
+    } else {
+        $("#switchEditar").prop('checked', false);
+        $("#smallDeshabilitar").addClass('fw-bold');
+    }
+    $("#inputEditarHeyUser").val(empresa.username);
+    $("#inputEditarHeyPassword").val('thisisafakepassword');
+
+    hideSpinner();
+}
+function validarEdicionCliente() {
+
+    let empresa = $("#inputEditarNombreEmpresa").val().toUpperCase();
+    let heyuser = $("#inputEditarHeyUser").val();
+    let heypass = $("#inputEditarHeyPassword").val();
+    let enabled;
+
+    if (empresa == "") {
+        $("#inputEditarNombreEmpresa").removeClass("is-valid");
+        $("#inputEditarNombreEmpresa").addClass("is-invalid");
+    } else {
+        $("#inputEditarNombreEmpresa").removeClass("is-invalid");
+        $("#inputEditarNombreEmpresa").addClass("is-valid");
+    }
+
+    if (heyuser == "") {
+        $("#inputEditarHeyUser").removeClass("is-valid");
+        $("#inputEditarHeyUser").addClass("is-invalid");
+    } else {
+        $("#inputEditarHeyUser").removeClass("is-invalid");
+        $("#inputEditarHeyUser").addClass("is-valid");
+    }
+
+    $("#switchEditar").prop("checked") ? enabled = true : enabled = false;
+
+    let id = $("#selectEditClientes").val();
+
+    if (empresa && heyuser && id != "#") {
+
+        let dataEmpresa = {
+            'id': id,
+            'name': empresa,
+            'username': heyuser,
+            'password': heypass,
+            'enabled': enabled,
+            'token': sessionStorage.getItem('token')
+        }
+
+        API_editarCliente(dataEmpresa);
+    } else {
+        showToast('danger', "Revise los datos ingresados");
+    }
+}
+function API_editarCliente(dataEmpresa) {
+    // console.log(dataEmpresa);
+    showSpinner();
+
+    $.ajax({
+        type: "PUT",
+        url: apiUrl + 'company/',
+        data: JSON.stringify(dataEmpresa),
+        success: API_editarClienteSuccess,
+        error: API_editarClienteError
+    })
+
+}
+function API_editarClienteSuccess(data) {
+    console.log(data);
+    showToast('success', 'Cliente modificado correctamente');
+    limpiarFormEditarCliente();
+}
+function API_editarClienteError(data) {
+    console.log(data);
+    showToast('error', 'Ocurrió un error al modificarlos datos');
+
+}
+
+
+//Agregar cliente
+function mostrarAgregarCliente() {
+    mostrarSeccion('divAgregarCliente');
+    $("#btnClientes").addClass('active');
+}
+function validarFormClienteNuevo() {
+
+    let empresa = $("#inputNombreEmpresa").val();
+    let heyuser = $("#inputHeyUser").val();
+    let heypass = $("#inputHeyPassword").val();
+
+    if (empresa == "") {
+        $("#inputNombreEmpresa").removeClass("is-valid");
+        $("#inputNombreEmpresa").addClass("is-invalid");
+    } else {
+        $("#inputNombreEmpresa").removeClass("is-invalid");
+        $("#inputNombreEmpresa").addClass("is-valid");
+    }
+
+    if (heyuser == "") {
+        $("#inputHeyUser").removeClass("is-valid");
+        $("#inputHeyUser").addClass("is-invalid");
+    } else {
+        $("#inputHeyUser").removeClass("is-invalid");
+        $("#inputHeyUser").addClass("is-valid");
+    }
+
+    if (heypass == "") {
+        $("#inputHeyPassword").removeClass("is-valid");
+        $("#inputHeyPassword").addClass("is-invalid");
+    } else {
+        $("#inputHeyPassword").removeClass("is-invalid");
+        $("#inputHeyPassword").addClass("is-valid");
+    }
+
+    if (empresa && heyuser && heypass) {
+        API_altaNuevoCliente(empresa.toUpperCase(), heyuser, heypass);
+    } else {
+        showToast('danger', "Revise los datos ingresados");
+    }
+}
+function API_altaNuevoCliente(empresa, heyuser, heypass) {
+    showSpinner();
+
+    let data = {
+        "name": empresa,
+        "username": heyuser,
+        "password": heypass,
+        "token": sessionStorage.getItem('token')
+    }
+
+    $.post({
+        type: "POST",
+        url: apiUrl + 'company/',
+        data: JSON.stringify(data),
+        success: API_altaNuevoClienteSuccess,
+        error: API_altaNuevoClienteError
+    })
+
+}
+function API_altaNuevoClienteSuccess(data) {
+    limpiarFormClienteNuevo();
+    showToast('success', "Cliente agregado correctamente");
+    hideSpinner();
+}
+function API_altaNuevoClienteError(data) {
+    showToast('danger', "Error al agregar cliente");
+    hideSpinner();
+}
+
+
+//Mostrar logs
+function mostrarLogs() {
+    mostrarSeccion('divLogs');
+    $("#btnMenuLog").addClass('active');
+    getLogs();
+}
+function getLogs(desde, hasta) {
+
+    showSpinner();
+    var dt = new Date();
+    var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+
+    if (!desde && !hasta) {
+        $.ajax({
+            type: 'GET',
+            url: apiUrl + `log?token=${sessionStorage.getItem('token')}&fecha=${time}`,
+            success: getLogsTodaySuccess,
+            error: getLogsTodayError
+        })
+    }
+    else{
+        $.ajax({
+            type: 'GET',
+            url: apiUrl + `log?token=${sessionStorage.getItem('token')}&fecha=${time}&desde=${desde}&hasta=${hasta}`,
+            success: getLogsTodaySuccess,
+            error: getLogsTodayError
+        })
+    }
+
+}
+function getLogsTodaySuccess(data) {
+    console.log(data);
+    logs_global = data.data;
+    cargarTablaLogs();
+}
+function getLogsTodayError() {
+
+    showToast('danger', 'Error al obtener los logs del servidor');
+}
+function cargarTablaLogs(pagina = 1, botonera = 1) {
+
+    cargarFechasInputsLogs();
+    $("#divTablaLog").empty();
+    $("#divTablaLog").append(' <h5 id="headerLogs" style="text-align:center"></h5>');
+
+    if (!logs_global) {
+        console.log("!logs_global");
+        $("#headerLogs").html(`No hay logs para el día seleccionado`);
+    }
+    else {
+        console.log("logs_global");
+        $("#divTablaLog").append(' <h5 id="headerLogs"></h5>');
+        if(logs_global[0].fechaLog){
+
+            $("#headerLogs").html(`Log del día ${logs_global[0].fechaLog}`);
+        }
+        if(logs_global[0].DESDE && logs_global[0].HASTA){
+
+            let fechaDesde = moment(logs_global[0].DESDE).format('YYYY-MM-DD  H:mm:ss');
+            // console.log(fechaDesde);
+            let fechaHasta = moment(logs_global[0].HASTA).format('YYYY-MM-DD H:mm:ss');
+            // console.log(fechaHasta);
+            $("#headerLogs").html(`Log desde ${fechaDesde} hasta ${fechaHasta}`);
+        }
+
+        let contenidoTabla = `
+        <table class="table table-striped table-hover" id="tablaLogs">
+        <thead>
+            <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Detalle</th>
+            <th scope="col">Severidad</th>
+            </tr>
+        </thead>`;
+
+        contenidoTabla += `<tbody>`;
+
+
+        if (!pagina) pagina = 1;
+        // console.log(pagina);
+        let cantidad = 10;
+        let hasta = cantidad * pagina;
+        let desde = hasta - cantidad;
+
+        for (let i = desde; i < hasta; i++) {
+            // console.log(logs_global[i]);
+            if (logs_global[i]) {
+                contenidoTabla += ` <tr>
+                                    <td>${logs_global[i]._date}</td>
+                                    <td>${logs_global[i].log}</td>`;
+
+                if (logs_global[i].severity == 'error') {
+                    contenidoTabla += `<td><span class="badge rounded-pill bg-danger">${logs_global[i].severity}</td>`;
+                } else {
+                    contenidoTabla += `<td>${logs_global[i].severity}`;
+                }
+
+                contenidoTabla += `</tr>`;
+            }
+        }
+        contenidoTabla += `</tbody>`;
+
+
+
+        let cantidad_botones = 10;
+
+        if (botonera > 1) {
+            cantidad_botones = 10;
+        }
+        let botoneraHasta = cantidad_botones * botonera;
+        let botoneraDesde = botoneraHasta - cantidad_botones;
+        // console.log('Botonera desde-> ', botoneraDesde);
+
+        if (logs_global.length > 10) {
+
+            calculoBotones = Math.ceil(logs_global.length / 10);
+            //console.log('Cantidad de botones -->' + calculoBotones);
+            let paginacion = ``;
+            paginacion += `<nav class="mt-auto" style="justify-self:end" aria-label="Paginacion log">
+                            <ul class="pagination " >`;
+
+            if (botoneraDesde >= cantidad_botones) {
+                paginacion += `<li class="page-item" ><a class="page-link" href="javascript:cargarTablaLogs('${pagina}','${parseInt(botonera) - 1}')"><-</a></li>`;
+            }
+            if (calculoBotones < botoneraHasta) {
+                botoneraHasta = calculoBotones;
+            }
+            for (let h = botoneraDesde + 1; h <= botoneraHasta; h++) {
+                if (pagina == h) {
+                    paginacion += `<li class="page-item active" ><a class="page-link" href="javascript:cargarTablaLogs('${h}','${botonera}')">${h}</a></li>`;
+                } else {
+                    paginacion += `<li class="page-item" ><a class="page-link" href="javascript:cargarTablaLogs('${h}','${botonera}')">${h}</a></li>`;
+                }
+            }
+            if (botoneraHasta < calculoBotones) {
+                paginacion += `<li class="page-item" ><a class="page-link" href="javascript:cargarTablaLogs('${pagina}','${parseInt(botonera) + 1}')">-></a></li>`;
+            }
+            paginacion += `</ul>
+                </nav>`;
+
+            $("#divTablaLog").append(paginacion);
+        }
+        $("#divTablaLog").append(contenidoTabla);
+    }
+    hideSpinner();
+}
+function cargarFechasInputsLogs() {
+
+    let desde = moment().format('YYYY-MM-DDT00:00');
+    let hasta = moment().format('YYYY-MM-DDT23:59');
+
+    $("#fecha_desde_log").val(`${desde}`);
+    $("#fecha_hasta_log").val(`${hasta}`);
+}
+function obtenerLogsPorFecha() {
+
+    let desde = $("#fecha_desde_log").val();
+    let hasta = $("#fecha_hasta_log").val();
+
+    // console.log("desde:" + desde + ' hasta: ' + hasta);
+    if (desde > hasta) {
+        showToast("danger", "Fecha desde no puede ser mayor que fecha hasta");
+    } else {
+        getLogs(desde, hasta);
+    }
+}
+
+
+
+//Limpiar formularios
+function limpiarFormEditarCliente() {
+    obtenerCompanias();
+    $("#inputEditarNombreEmpresa").val("");
+    $("#inputEditarNombreEmpresa").prop({ 'disabled': false });
+    $("#inputEditarNombreEmpresa").removeClass("is-valid");
+    $("#inputEditarNombreEmpresa").removeClass("is-invalid");
+    $("#inputEditarHeyUser").val("");
+    $("#inputEditarHeyUser").removeClass("is-valid");
+    $("#inputEditarHeyUser").removeClass("is-invalid");
+    $("#inputEditarHeyPassword").val("");
+    $("#inputEditarHeyPassword").removeClass("is-valid");
+    $("#inputEditarHeyPassword").removeClass("is-invalid");
+    $("#switchEditar").prop('checked', false);
+}
+function limpiarFormClienteNuevo() {
+    $("#inputNombreEmpresa").val("");
+    $("#inputNombreEmpresa").removeClass("is-valid");
+    $("#inputNombreEmpresa").removeClass("is-invalid");
+    $("#inputHeyUser").val("");
+    $("#inputHeyUser").removeClass("is-valid");
+    $("#inputHeyUser").removeClass("is-invalid");
+    $("#inputHeyPassword").val("");
+    $("#inputHeyPassword").removeClass("is-valid");
+    $("#inputHeyPassword").removeClass("is-invalid");
+}
+function limpiarFormularios() {
+    limpiarFormClienteNuevo();
+    limpiarFormEditarCliente();
+}
+
+
+//Disparar contadores
+function execContadores() {
+
+    getContadorEmpresas();
+
+}
+
+
+
+//Contador de empresas
+function getContadorEmpresas() {
+
+    var dt = new Date();
+    var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+    // console.log(time);
+    $.ajax({
+        type: 'GET',
+        url: apiUrl + `company?token=${sessionStorage.getItem('token')}&getCantEmpresas&fecha=${time}`,
+        success: getContadorEmpresasSuccess,
+        error: getContadorEmpresasError
+    })
+
+    timerCantEmpresas = setInterval(() => {
+
+        var dt = new Date();
+        var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+        // console.log(time);
+
+        $.ajax({
+            type: 'GET',
+            url: apiUrl + `company?token=${sessionStorage.getItem('token')}&getCantEmpresas&fecha=${time}`,
+            success: getContadorEmpresasSuccess,
+            error: getContadorEmpresasError
+        })
+
+    }, 5000);
+}
+function getContadorEmpresasSuccess(data) {
+
+    $("#cardCantEmpresas").html(`<span id="cardCantEmpresas" class="card-text" style="font-size:100px ;"><i class="bi bi-building" > </i> ${data.data}</span>`);
+}
+function getContadorEmpresasError(data) {
+    if (data.status == 401) {
+        cerrarSession();
+        showToast('danger', "Ocurrió un error con la sesión");
+    }
+    console.log(data);
+}
+
+
+//Contador de sesiones
+function getContadorSesiones() {
+
+    var dt = new Date();
+    var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+    // console.log(time);
+    $.ajax({
+        type: 'GET',
+        url: apiUrl + `session?token=${sessionStorage.getItem('token')}&getCantSessiones&fecha=${time}`,
+        success: getContadorSesionesSuccess,
+        error: getContadorSesionesError
+    })
+
+    timerCantSesiones = setInterval(() => {
+
+        var dt = new Date();
+        var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+
+        $.ajax({
+            type: 'GET',
+            url: apiUrl + `session?token=${sessionStorage.getItem('token')}&getCantSessiones&fecha=${time}`,
+            success: getContadorSesionesSuccess,
+            error: getContadorSesionesError
+        })
+
+    }, 5000);
+}
+function getContadorSesionesSuccess(data) {
+    // console.log(data);
+    $("#cardCantSesiones").html(`<span id="cardCantSesiones" class="card-text" style="font-size:100px ;"><i class="bi bi-chat-left-text"></i> ${data.data}</span>`);
+    hideSpinner();
+}
+function getContadorSesionesError(data) {
+    console.log(data);
+    if (data.status == 401) {
+        cerrarSession();
+    }
+}
+function limpiarIntervalos() {
+
+    // console.log("Intervalos detenidos");
+    clearInterval(timerCantEmpresas);
+    clearInterval(timerCantSesiones);
+}
+
+
+
+//TOASTS
+
+function showToast(type, message) {
+
+    $("#Toast").removeClass("bg-danger");
+    $("#Toast").removeClass("bg-success");
+
+
+    switch (type) {
+        case 'success':
+            var toast = new bootstrap.Toast(toastLiveExample);
+            $("#Toast").addClass("bg-success");
+            $("#msjToast").html(message);
+            toast.show()
+            break;
+        case 'danger':
+            var toast = new bootstrap.Toast(toastLiveExample);
+            $("#Toast").addClass("bg-danger");
+            $("#msjToast").html(message);
+
+            toast.show()
+            break;
+        default:
+            break;
+    }
+}
+
+//Spinner
+function showSpinner(timer) {
+
+    if (!timer) {
+
+        $(".loading").show();
+    } else {
+
+        $(".loading").show();
+        setTimeout(hideSpinner, timer);
+
+    }
+}
+function hideSpinner() {
+
+    $(".loading").hide();
+
+}
