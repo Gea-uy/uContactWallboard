@@ -1,9 +1,9 @@
 
-const apiConfigUrl = "http://localhost/Wallboard/Api/config/";
-const apiCampaignUrl = "http://localhost/Wallboard/Api/campaign/";
+// const apiConfigUrl = "http://localhost/Wallboard/Api/config/";
+// const apiCampaignUrl = "http://localhost/Wallboard/Api/campaign/";
 
-// const apiConfigUrl = "https://soporteuc.isbel.com.uy:8443/Wallboard/Api/config/";
-// const apiCampaignUrl = "https://soporteuc.isbel.com.uy:8443/Wallboard/Api/campaign/";
+const apiConfigUrl = "https://soporteuc.isbel.com.uy:8443/Wallboard/Api/config/";
+const apiCampaignUrl = "https://soporteuc.isbel.com.uy:8443/Wallboard/Api/campaign/";
 
 
 // const apiConfigUrl = "https://ucontactcloud.casmu.com:8443/Wallboard/Api/config/";
